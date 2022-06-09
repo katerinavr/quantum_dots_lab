@@ -11,9 +11,15 @@ import numpy as np
 import pandas as pd
 from pandas.api.types import is_numeric_dtype
 import glob 
-from core import thermocontroller
-from core.thermocontroller import Furnace
+from thermocontroller import thermocontroller
+from thermocontroller.thermocontroller import Furnace
 import threading
+from pumps import milligat
+
+
+pump_c = milligat.Milligat('C', serial.Serial('COM8', 9600))
+pump_c.set_flow_rate(1000)
+pump_c.stop_pump()
 
 def printit():
   threading.Timer(5.0, printit).start()

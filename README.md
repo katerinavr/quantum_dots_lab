@@ -29,6 +29,12 @@ msg=f'ASL = {flow rate}\r\n'.encode()
 ser10.write(msg)
 ```
 
+Measure Residense Time distribution (RTD):
+
+```
+python qd_lab/uv_vis/measure_rtd.py
+```
+
 Running an experiment using the current settings:
 
 ```
