@@ -32,5 +32,5 @@ ser10.write(msg)
 Running an experiment using the current settings:
 
 ```
-python lab.py -pump_rate_A <pump_rate_A> -pump_rate_B <pump_rate_B> -pump_rate_C <pump_rate_C> -temperature <temperature> -optimizer <select_optimizer>
+python qd_lab/lab.py -pump_rate_A <pump_rate_A> -pump_rate_B <pump_rate_B> -pump_rate_C <pump_rate_C> -temperature <temperature> -optimizer <select_optimizer>
 ```
