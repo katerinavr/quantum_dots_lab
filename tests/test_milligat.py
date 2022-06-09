@@ -33,5 +33,5 @@ def test_flowrate_update():
     pump.set_flow_rate(2600)
     # Stopping the pump
     pump.stop_pump()
-    assert len(ser.write_buffer) == 1
+    assert len(ser.write_buffer) == 3
     assert ser.write_buffer == [b'ASL = 1600\r\n', b'ASL = 2600\r\n', b'ASL = 0\r\n']

@@ -37,20 +37,6 @@ thermo=Furnace()
 # Shared dropbox folder
 file_path = 'C:\\Users\\kvriz\\Desktop\\Leeds\\scripts\\test_folder\\' 
 
-def getResponse(ser):
-    try:
-        response_list = []
-        while True:
-            response = ser.readlines()
-            for line in response:
-                line = line.strip(b'\n').decode('utf8')
-                line = line.strip('\r')
-                response_list.append(line)
-            break
-        return response_list
-    except:
-            ser.close()
-
 def set_temperature(temperature):
     #thermo=Furnace()
     #thermo.connect()
@@ -60,56 +46,7 @@ def read_temperature():
     #thermo=Furnace()
     return thermo.indicated()
 
-def start_pump_A(pump_rate): 
-    """Pump rate is given in mL min-1 and is then adjusted according 
-    to the Milligat rate"""
-    #milligat_rate = pump_rate*13397.87686
-    try:
-        ser10.open()
-    except:pass
-    msg=f'ASL = {pump_rate}\r\n'.encode()
-    ser10.write(msg)
-    #getResponse(ser10)
 
-def stop_milligat_A():
-    msg=f'ASL = 0\r\n'.encode()
-    ser10.write(msg)
-    ser10.close()
-    print('Pumping from pump A has finished')
-
-def start_pump_B(pump_rate): 
-    """Pump rate is given in mL min-1 and is then adjusted according 
-    to the Milligat rate"""
-    #milligat_rate = pump_rate*13397.87686
-    try:
-        ser11.open()
-    except:pass
-    msg=f'BSL = {pump_rate}\r\n'.encode()
-    ser11.write(msg)
-    #getResponse(ser11)
-
-def stop_milligat_B():
-    msg=f'BSL = 0\r\n'.encode()
-    ser11.write(msg)
-    ser11.close()
-    print('Pumping from pump B has finished')
-
-def start_pump_C(pump_rate): 
-    """Pump rate is given in mL min-1 and is then adjusted according 
-    to the Milligat rate"""
-    #milligat_rate = pump_rate*13397.87686
-    try:
-        ser8.open()
-    except:pass
-    msg=f'CSL = {pump_rate}\r\n'.encode()
-    ser8.write(msg)
-    #getResponse(ser8)
-
-def stop_milligat_C():
-    msg=f'CSL = 0\r\n'.encode()
-    ser8.write(msg)
-    ser8.close()
-    print('Pumping from pump C has finished')
 
 def start_experiment(pump_rate_A=None, pump_rate_B=None, pump_rate_C=None, temperature=None):
     #"""Pump rate in mL min-1"""
