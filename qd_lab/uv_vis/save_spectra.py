@@ -63,7 +63,7 @@ def get_absorption():
     #plt.plot(peaks+600, intensities[peaks+600], "x")
     #print(properties['peak_heights'].max())
     #plt.show()
-    #return properties['peak_heights'].max()
+    return properties['peak_heights'].max()
 
 def get_emmision():
     """Get the maximum emmision peak at a certain wavelength"""
