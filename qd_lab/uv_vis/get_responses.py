@@ -1,5 +1,6 @@
 from scipy.interpolate import splrep, sproot, splev
 from scipy.signal import find_peaks
+import numpy as np
 
 class MultiplePeaks(Exception): pass
 class NoPeaksFound(Exception): pass

@@ -15,11 +15,13 @@ from thermocontroller import thermocontroller
 from thermocontroller.thermocontroller import Furnace
 import threading
 from pumps import milligat
+from pumps import chemyx
+from pumps.chemyx import *
 
+thermo=Furnace()
 
-pump_c = milligat.Milligat('C', serial.Serial('COM8', 9600))
-pump_c.set_flow_rate(1000)
-pump_c.stop_pump()
+# Shared dropbox folder
+file_path = 'C:\\Users\\kvriz\\Desktop\\Leeds\\scripts\\test_folder\\' 
 
 def printit():
   threading.Timer(5.0, printit).start()
@@ -27,15 +29,6 @@ def printit():
   with open("temperature_log.txt", "a") as file_object:
         file_object.write(str(datetime.now()) + ' ' + str(temp))
         file_object.write('\n')
-
-# Milligat serial channels
-ser8 = serial.Serial('COM8',9600) # pump C
-ser10 = serial.Serial('COM10',9600) # pump A
-ser16 = serial.Serial('COM16',9600) # pump B
-thermo=Furnace()
-
-# Shared dropbox folder
-file_path = 'C:\\Users\\kvriz\\Desktop\\Leeds\\scripts\\test_folder\\' 
 
 def set_temperature(temperature):
     #thermo=Furnace()
@@ -46,31 +39,38 @@ def read_temperature():
     #thermo=Furnace()
     return thermo.indicated()
 
-
-
-def start_experiment(pump_rate_A=None, pump_rate_B=None, pump_rate_C=None, temperature=None):
+def start_experiment(chemyx_rate, pump_rate_A=None, pump_rate_B=None, pump_rate_C=None, temperature=None, sampling_time):
     #"""Pump rate in mL min-1"""
-    
-    set_temperature(temperature)
-    
-    start_pump_A(pump_rate_A)
-    start_pump_B(pump_rate_B)
-    start_pump_C(pump_rate_C)
-    time.sleep(60)
-    stop_milligat_A()
-    stop_milligat_B()
-    stop_milligat_C()
 
+    pump_a = milligat.Milligat('C', serial.Serial('COM10', 9600))
+    pump_b = milligat.Milligat('C', serial.Serial('COM16', 9600))
+    pump_c = milligat.Milligat('C', serial.Serial('COM8', 9600))
+
+    chemyx_pump = chemyx.Connection('COM4', baudrate=9600, x = 0, mode = 0, verbose=False)
+    chemyx_pump.openConnection()
+    chemyx_pump.startPump()
+    chemyx_pump.setUnits('mL/min')
+    chemyx_pump.setRate(chemyx_rate)
+            
+    set_temperature(temperature)
+    pump_a.set_flow_rate(pump_rate_A)
+    pump_b.set_flow_rate(pump_rate_B)
+    pump_c.set_flow_rate(pump_rate_C)
+    time.sleep(sampling_time)
+
+    # get the measurements from the analytical equipment
+    # call the save spectra functions
+    # Call the get responses function
+
+    pump_a.stop_pump()
+    pump_b.stop_pump()
+    pump_c.stop_pump()
+    chemyx_pump.stopPump()
+    chemyx_pump.closeConnection()
 
 # Command to run a single experiment with given settings
 #start_experiment(pump_rate_A=None, pump_rate_B=None, pump_rate_C=25000, temperature=None) # mL min-1
 
-# Read the params file and add the response
-def response_generator(params_dataset):
-    df = params_dataset 
-    df['response'] = pd.DataFrame(np.random.rand(1,1),
-                   columns=['conversion'])
-    return df
 
 #experiment_counter = 0
 

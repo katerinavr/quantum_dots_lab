@@ -3,8 +3,8 @@ from secrets import choice
 from shutil import register_unpack_format
 import sys
 import os
-from core import connect
-from core.connect import *
+from pumps import chemyx
+from pumps.chemyx import *
 import argparse
 import time
 
@@ -27,7 +27,7 @@ def main():
     #    print(connect.getOpenPorts())
     #    return
 
-    connection = connect.Connection('COM4', baudrate=9600, x = 0, mode = 0, verbose=False)
+    connection = chemyx.Connection('COM4', baudrate=9600, x = 0, mode = 0, verbose=False)
     #connect.Connection('COM4', baudrate = args.baudrate,  x = args.x,  mode=0, verbose=False)
     connection.openConnection()
 

@@ -1,7 +1,13 @@
 import seabreeze.spectrometers as sb
 import numpy as np
-#from chemios.utils import convert_to_lists
 import pandas as pd
+import datetime
+from scipy.interpolate import splrep, sproot, splev
+from scipy.signal import find_peaks
+import numpy as np
+
+class MultiplePeaks(Exception): pass
+class NoPeaksFound(Exception): pass
 
 #Note to self: Make the buffer a list of dictionaries each with the stage position and spectraself.
 #Use pop(0) to pop off the first spectra in the buffer when get_spectrum is called
@@ -72,6 +78,7 @@ class OceanOptics(object):
                 except TypeError:
                     pass
         return output
+        
 
     def store_blank(self, blank):
         """ Method to save blank intensisties
@@ -162,7 +169,97 @@ class OceanOptics(object):
                     pass
                 except TypeError:
                     pass
-        return output
+        #return output
+        # return the dataframe named according to the date/time it was produced
+        name = f'abs_{datetime.datetime.now().strftime("%H%M_%m%d%Y")}.csv'
+        dataset = pd.DataFrame(output, columns=['wavelenght, absorption']).
+        dataset.to_csv('uv_vis/uv_vis_spectra/absorption/name')
+        return dataset
 
     def fluorescence_read(self,integration_time, scans_to_average, filter=0):
-        raise NotImplementedError()
+        
+        self.ocean_optics.integration_time_micros(integration_time)
+
+        #Get wavelengths and drop useless data
+        wavelengths = self.ocean_optics.wavelengths()
+        wavelengths_splice = np.array(wavelengths[filter:])
+
+        #Subtract dark from blank
+        dark = np.array(self.dark_intensities[filter:])
+
+        #Find absorbance averaged over requested number of scans
+        average_buffer = [[] for i in range(scans_to_average)]
+        for i in range(scans_to_average):
+            average_buffer[i] = self.ocean_optics.intensities(correct_dark_counts=True, correct_nonlinearity=True)
+        average_intensities = np.mean(average_buffer, axis = 0) #average element wise the arrays
+        intensities_splice = np.array(average_intensities[filter:])
+        intensities_splice_minus_dark = np.subtract(intensities_splice, dark)
+        
+        #Remove Nans
+        absorbance = [x for x in absorbance if ~np.isnan(x)]
+
+        #Return spectrum array with wavelengths and absorbances
+        spectrum = [wavelengths_splice, intensities_splice_minus_dark]
+    
+        output = [[],[]]
+        #Convert int64 to int
+        for i, column in enumerate(spectrum):
+            for value in column:
+                try:
+                    output[i].append(float(value))             
+                except AttributeError:
+                    pass
+                except TypeError:
+                    pass
+        #return output
+        # return the dataframe named according to the date/time it was produced
+        name = f'emission_{datetime.datetime.now().strftime("%H%M_%m%d%Y")}.csv'
+        dataset = pd.DataFrame(output, columns=['wavelenght, emission'])
+        dataset.to_csv('uv_vis/uv_vis_spectra/absorption/name')
+        return dataset
+
+    def abs_max_intensity(self, dataset, range):
+        """
+        For a given Absorption spectra detect the maximum peak in a given range
+        
+        Args:
+            dataset : The saved absorption spectra
+            range: The range in nm, in which we expect the absorption peak for our material
+        """
+        dataset = self.absorbance_read
+        intensities =dataset.intensities
+        peaks, properties = find_peaks(intensities[range], height=0)
+        return properties['peak_heights'].max()
+    
+    def fwhm(self, k=10): # add the range of emmission
+        """
+            Determine full-with-half-maximum of a peaked set of points, x and y.
+            Assumes that there is only one peak present in the datasset.  The function
+            uses a spline interpolation of order k.
+        """
+        dataset = self.fluorescence_read
+        x= dataset.wavelenght
+        y= dataset.emission
+        half_max = np.amax(y)/2.0
+        s = splrep(x, y - half_max, k=k)
+        roots = sproot(s)
+
+        if len(roots) > 2:
+            raise MultiplePeaks("The dataset appears to have multiple peaks, and "
+                    "thus the FWHM can't be determined.")
+        elif len(roots) < 2:
+            raise NoPeaksFound("No proper peaks were found in the data set; likely "
+                        "the dataset is flat (e.g. all zeros).")
+        else:
+            return abs(roots[1] - roots[0])
+
+    def PL_max_intensity(self, reference_data, sample_refractive_index, sample_absorptrion, sample_emission):
+        
+        reference_QY = reference_data.QY
+        reference_abs = reference_data.absorption
+        reference_I = reference_data.emission
+        reference_refractive_index = 1
+        absorption_dataset = self.absorbance_read
+        emmision_dataset = self.fluorescence_read
+        sample_QY = reference_QY*reference_abs*reference_I*(sample_refractive_index/reference_refractive_index)^2
+        return sample_QY
