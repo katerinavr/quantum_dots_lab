@@ -42,8 +42,8 @@ def read_temperature():
 def start_experiment(chemyx_rate, pump_rate_A=None, pump_rate_B=None, pump_rate_C=None, temperature=None, sampling_time):
     #"""Pump rate in mL min-1"""
 
-    pump_a = milligat.Milligat('C', serial.Serial('COM10', 9600))
-    pump_b = milligat.Milligat('C', serial.Serial('COM16', 9600))
+    pump_a = milligat.Milligat('A', serial.Serial('COM10', 9600))
+    pump_b = milligat.Milligat('B', serial.Serial('COM16', 9600))
     pump_c = milligat.Milligat('C', serial.Serial('COM8', 9600))
 
     chemyx_pump = chemyx.Connection('COM4', baudrate=9600, x = 0, mode = 0, verbose=False)
