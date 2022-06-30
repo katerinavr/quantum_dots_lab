@@ -1,0 +1,35 @@
+{    "optimizer": "TSEMO",
+     "objectives": {
+     "name": "yield",
+     "goal": "maximize"   
+    },
+
+    "equipment": {
+        "pump_A":{
+        "com_channel": "COM12"   
+      },
+    
+      "thermocontroller":{
+        "com_channel":"COM12"
+      },
+
+      "absorption_spectrometer":{
+        "com_channel": "COM12"
+      },
+
+      "emission_spectrometer":{
+        "com_channel": "COM12"
+      }
+
+      },
+
+    "parameters": {
+        "flow_rate_pump_A": {
+            "values": [100, 150, 200, 250] 
+            },
+        "temperature": {
+            "values": [32, 64, 128, 256]
+            }
+        }
+
+}

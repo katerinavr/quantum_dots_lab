@@ -15,12 +15,14 @@ import time
 from datetime import datetime, timedelta
 
 # Connent the spectrometer for absorption
-spec1 = Spectrometer.from_serial_number('FLMS16051') #('USB2+H05739')
+#spec1 = Spectrometer.from_serial_number('USB2+H05739') #('FLMS16051') #
+spec1 = Spectrometer.from_first_available()
 spec1.integration_time_micros(138000)
+print(spec1)
 
 # Connent the spectrometer for emmision
-spec2 = Spectrometer.from_serial_number('USB2+H05739')
-spec2.integration_time_micros(6000000)
+#spec2 = Spectrometer.from_serial_number('USB2+H05739')
+#spec2.integration_time_micros(6000000)
 
 def printit():
   """Record the absorption peak over time"""
@@ -33,10 +35,10 @@ def printit():
 
 def get_absorption():
     """Get the maximum absorption peak at a certain wavelength"""
-    fiber_only = pd.read_csv('src/uv_vis/background_DT_mini.csv') # pd.read_csv('src/uv_vis/background_dh_mini.csv')
-    fiber_intensity = fiber_only.intensities
-    solvent_only = pd.read_csv('src/uv_vis/ethanol_nobackground_DT_mini.csv') #pd.read_csv('src/uv_vis/ethanol_nobackground_dh_mini.csv')
-
+    fig = plt.figure()
+    #fiber_only = pd.read_csv('data/uv_vis/default_spectra/background_DT_mini.csv')
+    #fiber_intensity = fiber_only.intensities
+    #solvent_only = pd.read_csv('data/uv_vis/default_spectra/ethanol_nobackground_DT_mini.csv') #pd.read_csv('src/uv_vis/ethanol_nobackground_dh_mini.csv')
     # Equivalent to scans to average functionality
     wavelngt=[]
     inte=[]
@@ -52,24 +54,25 @@ def get_absorption():
     spec = Spectrum1D(spectral_axis=wavelengths* u.Unit('nm'), flux=intensities* u.Unit('A') ) # [wavelengths, intensities]
     spec_bsmooth = box_smooth(spec, width=10).flux
     intensities = spec_bsmooth  #intensities #- fiber_intensity
-    #dataset=pd.concat([pd.DataFrame(wavelengths, columns=['wavelength']),
-    #pd.DataFrame(intensities, columns=['intensities'])], axis=1)
-    #dataset.to_csv('src/uv_vis/ethanol_nobackground_DT_mini.csv', index=None)  
+    dataset=pd.concat([pd.DataFrame(wavelengths, columns=['wavelength']),
+    pd.DataFrame(intensities, columns=['intensities'])], axis=1)
+    dataset.to_csv('data/uv_vis/default_spectra/background_DT_mini.csv')#(f'data/uv_vis_plots/asborption_spectra{number}.csv', index=None)  
     plt.plot(intensities)
     plt.xlabel('wavelengths')
     plt.ylabel('intensities')
     plt.xlim(400, 900)
-    peaks, properties = find_peaks(intensities[600:800], height=0)
+    #return fig
+    #peaks, properties = find_peaks(intensities[600:800], height=0)
     #plt.plot(peaks+600, intensities[peaks+600], "x")
     #print(properties['peak_heights'].max())
-    #plt.show()
-    return properties['peak_heights'].max()
+    plt.show()
+    #return properties['peak_heights'].max()
 
-def get_emmision():
+def get_emmision(number):
     """Get the maximum emmision peak at a certain wavelength"""
-    fiber_only = pd.read_csv('src/uv_vis/emmision_background_dh.csv')
+    fiber_only = pd.read_csv('data/uv_vis_spectra/default_spectra/emmision_background_dh.csv')
     fiber_intensity = fiber_only.intensities
-
+    fig = plt.figure()
     # Equivalent to scans to average functionality
     wavelngt=[]
     inte=[]
@@ -80,10 +83,11 @@ def get_emmision():
     intensities = np.mean(inte, axis=0)
     spec = Spectrum1D(spectral_axis=wavelengths* u.Unit('nm'), flux=intensities* u.Unit('A') )
     spec_bsmooth = box_smooth(spec, width=40).flux
-    intensities = spec_bsmooth  
-    #dataset=pd.concat([pd.DataFrame(wavelengths, columns=['wavelength']),
-    #pd.DataFrame(intensities, columns=['intensities'])], axis=1)
-    #dataset.to_csv('src/uv_vis/emmision_background_dh.csv', index=None)  
+    intensities = spec_bsmooth 
+
+    dataset=pd.concat([pd.DataFrame(wavelengths, columns=['wavelength']),
+    pd.DataFrame(intensities, columns=['intensities'])], axis=1)
+    dataset.to_csv(f'data/uv_vis_plots/emission_spectra{number}.csv', index=None)  
     plt.plot(wavelengths,intensities)
     plt.xlabel('wavelengths')
     plt.ylabel('intensities')
@@ -92,9 +96,10 @@ def get_emmision():
     peaks, properties = find_peaks(intensities[600:800], height=0)
     plt.plot(peaks+600, intensities[peaks+600], "x")
     print(properties['peak_heights'].max())
-    return plt.show()
+    #return plt.show()
     #return properties['peak_heights'].max()
+    return fig
 
 #printit()
-#get_absorption()
-get_emmision()
+get_absorption()
+#get_emmision()
