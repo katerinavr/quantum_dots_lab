@@ -1,0 +1,3 @@
+#!c:\users\kvriz\onedrive\documents\github\quantum_dots_lab\qd_lab\scripts\python.exe
+from numba.pycc import main
+main()
