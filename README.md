@@ -30,7 +30,7 @@ Setting the Milligat pump:
 from qd_lab.pumps import milligat
 
 pump_c = milligat.Milligat('C', serial.Serial('COM8', 9600))
-pump_c.set_flow_rate(1000)
+pump_c.set_flow_rate(0.5) # pump rates in mL/min
 pump_c.stop_pump()
 ```
 
