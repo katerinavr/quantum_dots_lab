@@ -16,10 +16,11 @@ class Milligat:
         #except:pass
     
     def set_flow_rate(self, flow_rate):
-        msg = f'{self.name}SL = {flow_rate}\r\n'.encode()
+        flow_rate_corrected = int(round(13398*flow_rate, 0))
+        print(flow_rate_corrected)
+        msg = f'{self.name}SL = {flow_rate_corrected}\r\n'.encode()
+        print(msg)
         self.ser.write(msg)
 
     def stop_pump(self):
         self.set_flow_rate(flow_rate=0)
-
-

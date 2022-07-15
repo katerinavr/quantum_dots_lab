@@ -3,8 +3,7 @@
 from lab import *
 import json
 from uv_vis.save_spectra import *
-from uv_vis.get_responses import *
-
+#from uv_vis.get_responses import *
 
 #pumpA=COM6
 # Opening JSON file
@@ -21,49 +20,50 @@ for i in data['equipment']:
 for i in data['parameters']:
     flow_rate_B = i['flow_rate_pump_A']['values']
 
-def start_closed_loop(experiment_counter):
-    # this command will start the experiment with the given conditions
-    start_experiment(pump_rate_A=None, pump_rate_B=flow_rate_B, pump_rate_C=None, temperature=None, sampling_time=10, com_A=None, com_B=com_B)
+
+def start_closed_loop():
+    print('start')
     
-    # this command will save the absorption spectra in the data file 
-    get_absorption(experiment_counter)
-
-    # this command will save the emission spectra in the data file 
-    get_emmision(experiment_counter)
+    # Shared dropbox folder where the files will be exchanged
+    file_path = 'C:/Users/kvriz/Dropbox/Leeds_Sheffield/food_dye' 
+    experiment_counter = 0
     
-    # this command will save the desired responces in a csv file
-    #abs_max_intensity(dataset, range)
-
-
-# Shared dropbox folder
-#file_path = 'onedrive_folder' 
-
-#experiment_counter = 0
-
-# Start recording the temperature
-#printit()
-
-#while True:
-#    experiment_counter += 1    
-#    while not os.path.exists(f'{file_path}\\{experiment_counter}_params.csv'):
-#        time.sleep(5)             
     
-#    params_dataset = pd.read_csv(f'{file_path}\\{experiment_counter}_params.csv')
-#    pump_rate_A = params_dataset.pump_rate_A.values[0]
-#    pump_rate_B = params_dataset.pump_rate_B.values[0]
-#    pump_rate_C = params_dataset.pump_rate_C.values[0]
-#    temperature = int(params_dataset.temperature.values[0])
-    
-#    start_experiment(pump_rate_A=pump_rate_A, pump_rate_B=pump_rate_B, pump_rate_C=pump_rate_C, temperature=temperature)
-    
-#    response_dataset = response_generator(params_dataset)
-#    response_dataset.to_csv(f'{file_path}\\{experiment_counter}_response.csv', index=None)
+    # Start recording the temperature
+    #printit()
 
-#    if experiment_counter >= 3:
-#        print('Process finished after 3 iterations!')
-#        try:
-#            stop_milligat_A()
-#            stop_milligat_B()
-#            stop_milligat_C()
-#        except:
-#            break
+    while True:
+        experiment_counter += 1  
+        while not os.path.exists(f'{file_path}/{experiment_counter}_param.csv'):
+            time.sleep(5)             
+    
+        params_dataset = pd.read_csv(f'{file_path}/{experiment_counter}_param.csv')
+        #print(params_dataset.pump_rate_A)
+        flow_rate_A = params_dataset.pump_rate_A.values[0]
+        flow_rate_B = params_dataset.pump_rate_B.values[0]
+        flow_rates = flow_rate_A + flow_rate_B
+        sampling_time = 1/(flow_rate_A + flow_rate_B)
+        #temperature = int(params_dataset.temperature.values[0])
+    
+        # this command will start the experiment with the given conditions
+        start_experiment(pump_rate_A=flow_rate_A, pump_rate_B=flow_rate_B, pump_rate_C=None, temperature=None, sampling_time=2*sampling_time, com_A='COM8', com_B='COM5')
+    
+        # this command will save the absorption spectra in the data file 
+        response_dataset = get_absorption() # response_generator(params_dataset)
+        response_dataset.to_csv(f'{file_path}/{experiment_counter}_spectra.csv', index=None)
+        max_red = response_dataset.intensities.values[472:817].max()
+        #print(max_red)
+        max_blue = response_dataset.intensities.values[935:1700].max()
+        #print(max_blue)
+        diff = abs(max_red -max_blue)
+        params_dataset['abs'] = diff
+        params_dataset.to_csv(f'{file_path}/{experiment_counter}_response.csv', index=None)
+
+        #if experiment_counter >= 3:
+        #    print('Process finished after 3 iterations!')
+        #    try:
+        #        start_experiment(pump_rate_A=0, pump_rate_B=0, pump_rate_C=None, temperature=None, sampling_time=2*sampling_time, com_A='COM8', com_B='COM5')
+        #    except:
+        #        pass
+
+start_closed_loop()

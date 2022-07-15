@@ -41,7 +41,7 @@ def start_experiment(chemyx_rate=None, pump_rate_A=None, pump_rate_B=None, pump_
     com_A=None, com_B=None, com_C=None):
     #"""Pump rate in mL min-1"""
     if pump_rate_A != None:
-        pump_a = milligat.Milligat('A', serial.Serial(com_A, 9600))
+        pump_a = milligat.Milligat('B', serial.Serial(com_A, 9600))
     if pump_rate_B != None:
         pump_b = milligat.Milligat('B', serial.Serial(com_B, 9600))
     if pump_rate_C != None:
@@ -65,21 +65,22 @@ def start_experiment(chemyx_rate=None, pump_rate_A=None, pump_rate_B=None, pump_
 
     if pump_rate_C != None:
         pump_c.set_flow_rate(pump_rate_C)
-    time.sleep(sampling_time)
 
+    time.sleep(sampling_time*60)
+    print('Stopping the pumps')
     # get the measurements from the analytical equipment
     # call the save spectra functions
     # Call the get responses function
 
-    if temperature != None:
-        pump_a.stop_pump()
-    if pump_rate_B != None:
-        pump_b.stop_pump()
-    if pump_rate_C != None:
-        pump_c.stop_pump()
-    if chemyx_rate != None:
-        chemyx_pump.stopPump()
-        chemyx_pump.closeConnection()
+    #if temperature != None:
+    pump_a.set_flow_rate(0)
+    #if pump_rate_B != None:
+    pump_b.set_flow_rate(0)
+    #if pump_rate_C != None:
+    #    pump_c.set_flow_rate(0)
+    #if chemyx_rate != None:
+    #    chemyx_pump.stopPump()
+    #    chemyx_pump.closeConnection()
 
 # Command to run a single experiment with given settings
 #start_experiment(pump_rate_A=None, pump_rate_B=None, pump_rate_C=25000, temperature=None) # mL min-1
